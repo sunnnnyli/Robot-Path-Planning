@@ -6,8 +6,6 @@ import copy
 # --------------------- Notes:
 # Have not implemented some final path tracing
 #    Board is reversed so direction might need changing for ginal answers
-# Currently not working, not sure what the issue is
-
 
 # Node class
 class Node:
@@ -47,8 +45,6 @@ def process_input(input_file_path):
             workspace.append(curr_line)
     input_file.close()
     workspace.reverse()
-    for line in workspace:
-        print(line)
     return start_pos, goal_pos, workspace
 
 
@@ -71,7 +67,7 @@ def check_pos(pos, workspace):
     """
     if pos[1] < 0 or pos[0] < 0 or pos[1] >= len(workspace) or pos[0] >= len(workspace[0]):
         return False
-    return workspace[pos[1]][pos[0]] == 0
+    return workspace[pos[1]][pos[0]] != 1
 
 
 def a_star_search_algo(start_pos, goal_pos, workspace):
@@ -128,10 +124,12 @@ def calculate_output_values(final_node, workspace):
     curr_node = final_node
     while curr_node:
         pos = curr_node.pos
-        print(pos)
-        new_workspace[pos[1]][pos[0]] = 4
+        if new_workspace[pos[1]][pos[0]] != 2 and new_workspace[pos[1]][pos[0]] != 5:
+            new_workspace[pos[1]][pos[0]] = 4
         depth += 1
         curr_node = curr_node.parent
+
+    new_workspace.reverse()
 
     return depth, new_workspace
 
