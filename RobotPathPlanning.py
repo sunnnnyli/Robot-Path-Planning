@@ -10,10 +10,11 @@ import argparse
 
 # Node class
 class Node:
-    def __init__(self, pos, path_cost, total_cost, parent = None):
+    def __init__(self, pos, path_cost, total_cost, last_angle=0, parent=None):
         self.pos = pos
         self.path_cost = path_cost
         self.total_cost = total_cost
+        self.last_angle = last_angle
         self.parent = parent
 
     def __lt__(self, other):
@@ -71,7 +72,60 @@ def is_valid_pos(pos, workspace):
     return workspace[pos[1]][pos[0]] != 1
 
 
-def a_star_search_algo(start_pos, goal_pos, workspace):
+def calculate_angle_cost(curr_angle, new_angle, k):
+    """
+    Calculates the angle cost for changing direction based on curr_angle and new_angle
+    :param curr_angle: angle of current node in degrees
+    :param new_angle: angle of next node in degrees
+    :param k: penalty coefficient for direction change
+    :return: angle cost as a float
+    """
+    delta_theta = abs(new_angle - curr_angle)
+    if delta_theta > 180:
+        delta_theta = 360 - delta_theta
+
+    return k * (delta_theta / 180)
+
+
+def calculate_distance_cost(curr_node, new_pos):
+    """
+    Calculates the distance cost to get to new_pos from curr_pos
+    :param curr_node: coordinates of curr position
+    :param new_pos: coordinates of new position
+    :return: distance cost as a float
+    """
+    # Check if horizontal or vertical move
+    if abs(new_pos[0] - curr_node.pos[0]) + abs(new_pos[1] - curr_node.pos[1]) == 1:
+        distance_cost = 1
+    else:
+        distance_cost = math.sqrt(2)
+
+    return distance_cost
+
+
+def calculate_step_cost(curr_node, new_pos, k):
+    """
+    Calculates the step cost by adding distance and angle costs
+    :param curr_node: coordinates of curr position
+    :param new_pos: coordinates of new position
+    :param k: penalty coefficient for direction change
+    :return: total step cost as a float
+    :return: new angle in degrees
+    """
+    if curr_node.parent is None:
+        angle_cost = 0
+        new_angle = 0
+    else:
+        dx, dy = new_pos[0] - curr_node.pos[0], new_pos[1] - curr_node.pos[1]
+        new_angle = math.degrees(math.atan2(dy, dx)) % 360
+        angle_cost = calculate_angle_cost(curr_node.last_angle, new_angle, k)
+
+    distance_cost = calculate_distance_cost(curr_node, new_pos)
+
+    return distance_cost + angle_cost, new_angle
+
+
+def a_star_search_algo(start_pos, goal_pos, workspace, k):
     """
     Implementation of the A* search algorithm
     :param start_pos: starting coordinate
@@ -104,16 +158,13 @@ def a_star_search_algo(start_pos, goal_pos, workspace):
 
                 # Append node to generated and frontier if it's valid
                 if is_valid_pos(new_pos, workspace):
-                    if direction == (1, 0) or direction == (0, 1) or direction == (-1, 0) or direction == (0, -1):
-                        action_cost = 1
-                    else:
-                        action_cost = math.sqrt(2)
-                    child_path_cost = curr_node.path_cost + action_cost
+                    step_cost, new_angle = calculate_step_cost(curr_node, new_pos, k)
+                    child_path_cost = curr_node.path_cost + step_cost
                     child_heuristic = calculate_heuristic(new_pos, goal_pos)
                     child_total_cost = child_path_cost + child_heuristic
                     if new_pos in reached and reached[new_pos] <= child_total_cost:
                         continue
-                    child_node = Node(new_pos, child_path_cost, child_total_cost, curr_node)
+                    child_node = Node(new_pos, child_path_cost, child_total_cost, last_angle=new_angle, parent=curr_node)
                     generated.append(child_node)
                     heapq.heappush(frontier, child_node)
 
@@ -147,15 +198,15 @@ def output_into_file(output_workspace):
 def main():
     parser = argparse.ArgumentParser(description="Run A* search on a robot workspace")
     parser.add_argument("input_file", type=str, help="Path to the input file")
-    parser.add_argument("-k", type=int, default=0, help="Angle cost penalty parameter (not yet implemented)")
+    parser.add_argument("-k", type=int, default=0, help="Angle cost penalty parameter")
     args = parser.parse_args()
 
     start_pos, goal_pos, workspace = process_input(args.input_file)
-    result = a_star_search_algo(start_pos, goal_pos, workspace)
+    result = a_star_search_algo(start_pos, goal_pos, workspace, args.k)
     if result:
         final_node, generated_nodes = result
         depth, output_workspace = calculate_output_values(final_node, workspace)
-        print(depth)
+        print(f"Depth: {depth}")
         output_into_file(output_workspace)
 
 
