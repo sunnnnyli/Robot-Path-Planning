@@ -10,9 +10,20 @@ DIRECTIONS = [(1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0), (-1, -1), (0, -1), (1, -
 # --------------------- Notes:
 # Have not implemented some final path tracing
 #    Board is reversed so direction might need changing for final answers
+# OutputModel class to simplify the code relating to the output
+class OutputModel():
+    def __init__(self, output_dict: dict):
+        self.depth = output_dict["depth"]
+        self.generated_nodes = len(output_dict["generated_nodes"])
+        self.moves = " ".join(map(str, output_dict["moves"]))
+        self.f_values = " ".join(map(str, output_dict["f_values"]))
+        
+        rows = [" ".join(map(str, row)) for row in output_dict["workspace"]]
+        self.output_workspace = "\n".join(rows)
+
 
 # Node class
-class Node:
+class Node():
     def __init__(self, pos, path_cost, total_cost, last_angle=0, parent=None):
         self.pos = pos
         self.path_cost = path_cost
@@ -198,17 +209,23 @@ def calculate_output_values(final_node, workspace):
     f_values.reverse()
     new_workspace.reverse()
 
-    return depth, moves, f_values, new_workspace
+    return {
+        "depth": depth,
+        "moves": moves,
+        "f_values": f_values,
+        "workspace": new_workspace
+    }
 
 
-def output_into_file(depth, generated_nodes, moves, f_values, output_workspace):
-    output_file = open("final_output.txt", "w")
-    print(depth, file=output_file)
-    print(len(generated_nodes), file=output_file)
-    print(" ".join(map(str, moves)), file=output_file)
-    print(" ".join(map(str, f_values)), file=output_file)
-    for row in output_workspace:
-        print(" ".join(map(str, row)), file=output_file)
+def output_into_file(output: OutputModel, file="final_output.txt"):
+    output_file = open(file, "w")
+
+    print(output.depth, file=output_file)
+    print(output.generated_nodes, file=output_file)
+    print(output.moves, file=output_file)
+    print(output.f_values, file=output_file)
+    print(output.output_workspace, file=output_file)
+
     output_file.close()
 
 
@@ -222,8 +239,10 @@ def main():
     result = a_star_search_algo(start_pos, goal_pos, workspace, args.k)
     if result:
         final_node, generated_nodes = result
-        depth, moves, f_values, output_workspace = calculate_output_values(final_node, workspace)
-        output_into_file(depth, generated_nodes, moves, f_values, output_workspace)
+        output_dict = calculate_output_values(final_node, workspace)
+        output_dict["generated_nodes"] = generated_nodes
+        output = OutputModel(output_dict)
+        output_into_file(output)
 
 
 if __name__ == "__main__":
