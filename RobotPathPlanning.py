@@ -4,6 +4,9 @@ import copy
 import argparse
 
 
+DIRECTIONS = [(1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0), (-1, -1), (0, -1), (1, -1)]
+
+
 # --------------------- Notes:
 # Have not implemented some final path tracing
 #    Board is reversed so direction might need changing for final answers
@@ -18,7 +21,7 @@ class Node:
         self.parent = parent
 
     def __lt__(self, other):
-        # used for heapq
+        # Used for heapq
         return self.total_cost < other.total_cost
 
     def __repr__(self):
@@ -133,7 +136,6 @@ def a_star_search_algo(start_pos, goal_pos, workspace, k):
     :param workspace: workspace 2D list
     :return: None if no solution; curr_node, generated if solution is found
     """
-    directions = [(1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0), (-1, -1), (0, -1), (1, -1)]
     start_node = Node(start_pos, 0, 0)
     reached = {}
     frontier = []
@@ -153,7 +155,7 @@ def a_star_search_algo(start_pos, goal_pos, workspace, k):
             reached[curr_node.pos] = curr_node.total_cost
 
             # Generate all child nodes
-            for direction in directions:
+            for direction in DIRECTIONS:
                 new_pos = (curr_node.pos[0] + direction[0], curr_node.pos[1] + direction[1])
 
                 # Append node to generated and frontier if it's valid
@@ -172,42 +174,56 @@ def a_star_search_algo(start_pos, goal_pos, workspace, k):
 def calculate_output_values(final_node, workspace):
     # Just didn't want to change the original workspace
     new_workspace = copy.deepcopy(workspace)
-    depth = 0
     curr_node = final_node
+    depth = -1
+    moves = []
+    f_values = []
+
     while curr_node:
         pos = curr_node.pos
         if new_workspace[pos[1]][pos[0]] != 2 and new_workspace[pos[1]][pos[0]] != 5:
             new_workspace[pos[1]][pos[0]] = 4
         depth += 1
+        f_values.append(curr_node.total_cost)
+        
+        if curr_node.parent is not None:
+            direction = (curr_node.pos[0] - curr_node.parent.pos[0],
+                         curr_node.pos[1] - curr_node.parent.pos[1])
+            move = DIRECTIONS.index(direction)
+            moves.append(move)
+
         curr_node = curr_node.parent
 
+    moves.reverse()
+    f_values.reverse()
     new_workspace.reverse()
 
-    return depth, new_workspace
+    return depth, moves, f_values, new_workspace
 
 
-def output_into_file(output_workspace):
+def output_into_file(depth, generated_nodes, moves, f_values, output_workspace):
     output_file = open("final_output.txt", "w")
-    for i in range(len(output_workspace)):
-        for j in range(len(output_workspace[0])):
-            print(output_workspace[i][j], end=" ", file=output_file)
-        print(file=output_file)
+    print(depth, file=output_file)
+    print(len(generated_nodes), file=output_file)
+    print(" ".join(map(str, moves)), file=output_file)
+    print(" ".join(map(str, f_values)), file=output_file)
+    for row in output_workspace:
+        print(" ".join(map(str, row)), file=output_file)
     output_file.close()
 
 
 def main():
     parser = argparse.ArgumentParser(description="Run A* search on a robot workspace")
     parser.add_argument("input_file", type=str, help="Path to the input file")
-    parser.add_argument("-k", type=int, default=0, help="Angle cost penalty parameter")
+    parser.add_argument("k", type=int, nargs='?', default=0, help="Angle cost penalty parameter (default: 0)")
     args = parser.parse_args()
 
     start_pos, goal_pos, workspace = process_input(args.input_file)
     result = a_star_search_algo(start_pos, goal_pos, workspace, args.k)
     if result:
         final_node, generated_nodes = result
-        depth, output_workspace = calculate_output_values(final_node, workspace)
-        print(f"Depth: {depth}")
-        output_into_file(output_workspace)
+        depth, moves, f_values, output_workspace = calculate_output_values(final_node, workspace)
+        output_into_file(depth, generated_nodes, moves, f_values, output_workspace)
 
 
 if __name__ == "__main__":

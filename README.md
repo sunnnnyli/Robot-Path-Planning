@@ -31,7 +31,7 @@ The cost for each move is calculated as the sum of:
 
 ### Output Format
 
-The program outputs a text file with 34 lines, including:
+The program outputs a text file `final_output.txt` with 34 lines, including:
 1. **Depth of Goal Node**: Level of the goal node.
 2. **Total Nodes Generated**: Nodes generated in the search.
 3. **Solution Path**: Sequence of moves from start to goal.
@@ -41,8 +41,8 @@ The program outputs a text file with 34 lines, including:
 ## Running the Program
 To execute the program, input the file path and optionally include the penalty factor `k`. If `k` is not supplied, it will be defaulted to 0.
  ```bash
- python RobotPathPlanning.py Sample_input.txt       # k defaults to 0
- python RobotPathPlanning.py Sample_input.txt -k 5  # Sets penalty factor k to 5
+ python RobotPathPlanning.py Sample_input.txt     # k defaults to 0
+ python RobotPathPlanning.py Sample_input.txt 5   # Sets penalty factor k to 5
  ```
 ## Files
 
