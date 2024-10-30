@@ -1,11 +1,12 @@
 import heapq
 import math
 import copy
+import argparse
 
 
 # --------------------- Notes:
 # Have not implemented some final path tracing
-#    Board is reversed so direction might need changing for ginal answers
+#    Board is reversed so direction might need changing for final answers
 
 # Node class
 class Node:
@@ -58,7 +59,7 @@ def calculate_heuristic(curr_pos, goal_pos):
     return math.sqrt((curr_pos[0]-goal_pos[0])**2+(curr_pos[1]-goal_pos[1])**2)
 
 
-def check_pos(pos, workspace):
+def is_valid_pos(pos, workspace):
     """
     Returns whether a position is valid (not out of bound and not blocked)
     :param pos: position to check
@@ -102,7 +103,7 @@ def a_star_search_algo(start_pos, goal_pos, workspace):
                 new_pos = (curr_node.pos[0] + direction[0], curr_node.pos[1] + direction[1])
 
                 # Append node to generated and frontier if it's valid
-                if check_pos(new_pos, workspace):
+                if is_valid_pos(new_pos, workspace):
                     if direction == (1, 0) or direction == (0, 1) or direction == (-1, 0) or direction == (0, -1):
                         action_cost = 1
                     else:
@@ -144,7 +145,12 @@ def output_into_file(output_workspace):
 
 
 def main():
-    start_pos, goal_pos, workspace = process_input("Sample input.txt")
+    parser = argparse.ArgumentParser(description="Run A* search on a robot workspace")
+    parser.add_argument("input_file", type=str, help="Path to the input file")
+    parser.add_argument("-k", type=int, default=0, help="Angle cost penalty parameter (not yet implemented)")
+    args = parser.parse_args()
+
+    start_pos, goal_pos, workspace = process_input(args.input_file)
     result = a_star_search_algo(start_pos, goal_pos, workspace)
     if result:
         final_node, generated_nodes = result
@@ -155,7 +161,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-

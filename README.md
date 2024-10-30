@@ -39,12 +39,13 @@ The program outputs a text file with 34 lines, including:
 5. **Final Workspace Layout**: Updated grid showing the path (cells marked as `4`).
 
 ## Running the Program
-Execute the program and input the required parameters, including the penalty factor `k`.
+To execute the program, input the file path and optionally include the penalty factor `k`. If `k` is not supplied, it will be defaulted to 0.
  ```bash
- python path_planning.py --input input_file.txt --output output_file.txt --penalty 2
+ python RobotPathPlanning.py Sample_input.txt       # k defaults to 0
+ python RobotPathPlanning.py Sample_input.txt -k 5  # Sets penalty factor k to 5
  ```
 ## Files
 
-- `path_planning.py`: Main program implementing the A* algorithm.
-- `input_file.txt`: Example input file representing the workspace.
-- `output_file.txt`: Sample output file showing the solution and workspace layout.
+- `RobotPathPlanning.py`: Main program implementing the A* algorithm.
+- `Sample_input.txt`: Example input file representing the workspace.
+- `final_output.txt`: Output file showing the solution and workspace layout.
