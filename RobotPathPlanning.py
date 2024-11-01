@@ -7,9 +7,6 @@ import argparse
 DIRECTIONS = [(1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0), (-1, -1), (0, -1), (1, -1)]
 
 
-# --------------------- Notes:
-# Have not implemented some final path tracing
-#    Board is reversed so direction might need changing for final answers
 # OutputModel class to simplify the code relating to the output
 class OutputModel():
     def __init__(self, output_dict: dict):
@@ -183,8 +180,15 @@ def a_star_search_algo(start_pos, goal_pos, workspace, k):
 
 
 def calculate_output_values(final_node, workspace):
+    """
+    Function used to calculate several values needed for output
+    :param final_node: The last node in the path found
+    :param workspace: 2D list of the workspace
+    :return: dictionary of all the values
+    """
     # Just didn't want to change the original workspace
     new_workspace = copy.deepcopy(workspace)
+
     curr_node = final_node
     depth = -1
     moves = []
@@ -218,6 +222,12 @@ def calculate_output_values(final_node, workspace):
 
 
 def output_into_file(output: OutputModel, file="final_output.txt"):
+    """
+    Used to write all output data into a output file
+    :param output: The OutputModel used to help with output generation
+    :param file: the filepath of the output file
+    :return: None
+    """
     output_file = open(file, "w")
 
     print(output.depth, file=output_file)
