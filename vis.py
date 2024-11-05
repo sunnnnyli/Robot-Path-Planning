@@ -38,7 +38,7 @@ def plot_maze(file_path):
 
 
 def main():
-    file_path = sys.argv[1]
+    file_path = "vis_input.txt"
     plot_maze(file_path)
 
 

@@ -1,3 +1,8 @@
+"""
+Robot Path Finding Project
+Authors: Anna Teng, Sunny Li
+"""
+
 import heapq
 import math
 import copy
@@ -64,9 +69,9 @@ def process_input(input_file_path):
 def calculate_heuristic(curr_pos, goal_pos):
     """
     Calculate the h(n) value based on current and goal position
-    :param curr_pos:
-    :param goal_pos:
-    :return:
+    :param curr_pos: tuple of current location
+    :param goal_pos: tuple of goal position
+    :return: The heuristic value calculated
     """
     return math.sqrt((curr_pos[0]-goal_pos[0])**2+(curr_pos[1]-goal_pos[1])**2)
 
@@ -144,7 +149,7 @@ def a_star_search_algo(start_pos, goal_pos, workspace, k):
     :param workspace: workspace 2D list
     :return: None if no solution; curr_node, generated if solution is found
     """
-    start_node = Node(start_pos, 0, 0)
+    start_node = Node(start_pos, 0, calculate_heuristic(start_pos, goal_pos))
     reached = {}
     frontier = []
     heapq.heappush(frontier, start_node)
@@ -221,7 +226,7 @@ def calculate_output_values(final_node, workspace):
     }
 
 
-def output_into_file(output: OutputModel, file="final_output.txt"):
+def output_into_file(output: OutputModel, file="Output3_k4.txt"):
     """
     Used to write all output data into a output file
     :param output: The OutputModel used to help with output generation
