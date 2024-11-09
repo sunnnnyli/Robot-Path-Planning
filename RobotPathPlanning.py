@@ -48,7 +48,11 @@ def process_input(input_file_path):
     :param input_file_path: path of input file
     :return: tuple of starting and goal positions, and a 2D array of the robot workspace
     """
-    input_file = open(input_file_path, 'r')
+    try:
+        input_file = open(input_file_path, 'r')
+    except FileNotFoundError:
+        print("File not found!")
+        return
     first_line = input_file.readline()
     first_line_data = first_line.strip().split()
     start_pos = (int(first_line_data[0]), int(first_line_data[1]))
@@ -163,27 +167,22 @@ def a_star_search_algo(start_pos, goal_pos, workspace, k):
         if curr_node.pos == goal_pos:
             return curr_node, generated
 
-        # If node is not a repeat
-        if curr_node.pos not in reached or curr_node.total_cost < reached[curr_node.pos]:
-            reached[curr_node.pos] = curr_node.total_cost
+        # Generate all child nodes
+        for direction in DIRECTIONS:
+            new_pos = (curr_node.pos[0] + direction[0], curr_node.pos[1] + direction[1])
 
-            # Generate all child nodes
-            for direction in DIRECTIONS:
-                new_pos = (curr_node.pos[0] + direction[0], curr_node.pos[1] + direction[1])
-
-                # Append node to generated and frontier if it's valid
-                if is_valid_pos(new_pos, workspace):
-                    step_cost, new_angle = calculate_step_cost(curr_node, new_pos, k)
-                    child_path_cost = curr_node.path_cost + step_cost
-                    child_heuristic = calculate_heuristic(new_pos, goal_pos)
-                    child_total_cost = child_path_cost + child_heuristic
-                    if new_pos in reached and reached[new_pos] <= child_total_cost:
-                        continue
-                    child_node = Node(new_pos, child_path_cost, child_total_cost, last_angle=new_angle, parent=curr_node)
-                    generated.append(child_node)
-                    heapq.heappush(frontier, child_node)
-
-    return None
+            # Append node to generated and frontier if it's valid
+            if is_valid_pos(new_pos, workspace):
+                step_cost, new_angle = calculate_step_cost(curr_node, new_pos, k)
+                child_path_cost = curr_node.path_cost + step_cost
+                child_heuristic = calculate_heuristic(new_pos, goal_pos)
+                child_total_cost = child_path_cost + child_heuristic
+                if new_pos in reached and reached[new_pos] <= child_total_cost:
+                    continue
+                child_node = Node(new_pos, child_path_cost, child_total_cost, last_angle=new_angle, parent=curr_node)
+                reached[child_node.pos] = child_node.total_cost
+                generated.append(child_node)
+                heapq.heappush(frontier, child_node)
 
 
 def calculate_output_values(final_node, workspace):
@@ -228,7 +227,7 @@ def calculate_output_values(final_node, workspace):
     }
 
 
-def output_into_file(output: OutputModel, file="Output3_k4.txt"):
+def output_into_file(output: OutputModel, file="sample testing.txt"):
     """
     Used to write all output data into a output file
     :param output: The OutputModel used to help with output generation
