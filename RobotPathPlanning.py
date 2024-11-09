@@ -128,12 +128,12 @@ def calculate_step_cost(curr_node, new_pos, k):
     :return: total step cost as a float
     :return: new angle in degrees
     """
+    dx, dy = new_pos[0] - curr_node.pos[0], new_pos[1] - curr_node.pos[1]
+    new_angle = math.degrees(math.atan2(dy, dx)) % 360
+    
     if curr_node.parent is None:
         angle_cost = 0
-        new_angle = 0
     else:
-        dx, dy = new_pos[0] - curr_node.pos[0], new_pos[1] - curr_node.pos[1]
-        new_angle = math.degrees(math.atan2(dy, dx)) % 360
         angle_cost = calculate_angle_cost(curr_node.last_angle, new_angle, k)
 
     distance_cost = calculate_distance_cost(curr_node, new_pos)
@@ -182,6 +182,8 @@ def a_star_search_algo(start_pos, goal_pos, workspace, k):
                     child_node = Node(new_pos, child_path_cost, child_total_cost, last_angle=new_angle, parent=curr_node)
                     generated.append(child_node)
                     heapq.heappush(frontier, child_node)
+
+    return None
 
 
 def calculate_output_values(final_node, workspace):
