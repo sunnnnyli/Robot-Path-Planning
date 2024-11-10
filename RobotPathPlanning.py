@@ -35,7 +35,7 @@ def setup_logging(input_file_name, output_file_name, k):
 
 
 # OutputModel class to simplify the code relating to the output
-class OutputModel():
+class OutputModel:
     def __init__(self, output_dict: dict):
         self.depth = output_dict["depth"]
         self.generated_nodes = len(output_dict["generated_nodes"])
@@ -47,7 +47,7 @@ class OutputModel():
 
 
 # Node class
-class Node():
+class Node:
     def __init__(self, pos, path_cost, total_cost, last_angle=0, parent=None):
         self.pos = pos
         self.path_cost = path_cost
@@ -176,10 +176,9 @@ def a_star_search_algo(start_pos, goal_pos, workspace, k):
     :return: None if no solution; curr_node, generated if solution is found
     """
     start_node = Node(start_pos, 0, calculate_heuristic(start_pos, goal_pos))
-    reached = {}
+    reached = {start_pos: start_node.total_cost}
     frontier = []
     heapq.heappush(frontier, start_node)
-    generated = [start_node]
 
     logging.info(f"Generated node:\t\t{start_node}")
 
@@ -192,7 +191,8 @@ def a_star_search_algo(start_pos, goal_pos, workspace, k):
         # If solution is found
         if curr_node.pos == goal_pos:
             logging.info("======GOAL REACHED!!!======")
-            return curr_node, generated
+            logging.info("Reached: " + str(len(reached)))
+            return curr_node, reached
 
         # Generate all child nodes
         for direction in DIRECTIONS:
@@ -208,7 +208,6 @@ def a_star_search_algo(start_pos, goal_pos, workspace, k):
                     continue
                 child_node = Node(new_pos, child_path_cost, child_total_cost, last_angle=new_angle, parent=curr_node)
                 reached[child_node.pos] = child_node.total_cost
-                generated.append(child_node)
                 heapq.heappush(frontier, child_node)
 
                 logging.info(f"Generated node:\t\t{child_node}")
