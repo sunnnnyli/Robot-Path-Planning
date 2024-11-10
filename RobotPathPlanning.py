@@ -3,6 +3,7 @@ Robot Path Finding Project
 Authors: Anna Teng, Sunny Li
 """
 
+import os
 import heapq
 import math
 import copy
@@ -52,7 +53,7 @@ def process_input(input_file_path):
         input_file = open(input_file_path, 'r')
     except FileNotFoundError:
         print("File not found!")
-        return
+        return exception
     first_line = input_file.readline()
     first_line_data = first_line.strip().split()
     start_pos = (int(first_line_data[0]), int(first_line_data[1]))
@@ -227,14 +228,19 @@ def calculate_output_values(final_node, workspace):
     }
 
 
-def output_into_file(output: OutputModel, file="sample testing.txt"):
+def output_into_file(output: OutputModel, file_name="sample testing.txt"):
     """
     Used to write all output data into a output file
     :param output: The OutputModel used to help with output generation
     :param file: the filepath of the output file
     :return: None
     """
-    output_file = open(file, "w")
+    os.makedirs('Outputs', exist_ok=True)
+
+    # Construct the full path
+    output_file_path = os.path.join('Outputs', file_name)
+
+    output_file = open(output_file_path, "w")
 
     print(output.depth, file=output_file)
     print(output.generated_nodes, file=output_file)
