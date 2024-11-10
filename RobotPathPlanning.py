@@ -159,6 +159,7 @@ def calculate_step_cost(curr_node, new_pos, k):
     
     if curr_node.parent is None:
         angle_cost = 0
+        new_angle = 0
     else:
         angle_cost = calculate_angle_cost(curr_node.last_angle, new_angle, k)
 
