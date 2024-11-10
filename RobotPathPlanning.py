@@ -4,13 +4,34 @@ Authors: Anna Teng, Sunny Li
 """
 
 import os
+import logging
 import heapq
 import math
 import copy
 import argparse
+from datetime import datetime
 
 
 DIRECTIONS = [(1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0), (-1, -1), (0, -1), (1, -1)]
+
+
+# Set up logging configuration
+def setup_logging(input_file_name, output_file_name, k):
+    os.makedirs('Logs', exist_ok=True)
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    log_filename = os.path.join('Logs', f"{timestamp}.log")
+
+    logging.basicConfig(
+        filename=log_filename,
+        level=logging.INFO,
+        format='%(message)s'
+    )
+
+    logging.info("========= A* Search Run Log =========")
+    logging.info(f"Input File: {input_file_name}")
+    logging.info(f"Output File: Outputs\\{output_file_name}")
+    logging.info(f"k: {k}")
+    logging.info("=====================================\n")
 
 
 # OutputModel class to simplify the code relating to the output
@@ -160,12 +181,17 @@ def a_star_search_algo(start_pos, goal_pos, workspace, k):
     heapq.heappush(frontier, start_node)
     generated = [start_node]
 
+    logging.info(f"Generated node:\t\t{start_node}")
+
     while frontier:
         # Get the smallest value
         curr_node = heapq.heappop(frontier)
 
+        logging.info(f"Frontier popped:\t{curr_node}")
+
         # If solution is found
         if curr_node.pos == goal_pos:
+            logging.info("======GOAL REACHED!!!======")
             return curr_node, generated
 
         # Generate all child nodes
@@ -184,6 +210,9 @@ def a_star_search_algo(start_pos, goal_pos, workspace, k):
                 reached[child_node.pos] = child_node.total_cost
                 generated.append(child_node)
                 heapq.heappush(frontier, child_node)
+
+                logging.info(f"Generated node:\t\t{child_node}")
+                logging.info(f"Added to frontier:\t{child_node}")
 
 
 def calculate_output_values(final_node, workspace):
@@ -257,6 +286,8 @@ def main():
     parser.add_argument("k", type=int, nargs='?', default=0, help="Angle cost penalty parameter (default: 0)")
     parser.add_argument("-o", "--output_file", type=str, default="Output.txt", help="Name of the output file (default: 'Output.txt')")
     args = parser.parse_args()
+
+    setup_logging(args.input_file, args.output_file, args.k)
 
     start_pos, goal_pos, workspace = process_input(args.input_file)
     result = a_star_search_algo(start_pos, goal_pos, workspace, args.k)
