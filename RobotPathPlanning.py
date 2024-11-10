@@ -53,7 +53,7 @@ def process_input(input_file_path):
         input_file = open(input_file_path, 'r')
     except FileNotFoundError:
         print("File not found!")
-        return exception
+        return
     first_line = input_file.readline()
     first_line_data = first_line.strip().split()
     start_pos = (int(first_line_data[0]), int(first_line_data[1]))
@@ -228,7 +228,7 @@ def calculate_output_values(final_node, workspace):
     }
 
 
-def output_into_file(output: OutputModel, file_name="sample testing.txt"):
+def output_into_file(output: OutputModel, file_name):
     """
     Used to write all output data into a output file
     :param output: The OutputModel used to help with output generation
@@ -255,6 +255,7 @@ def main():
     parser = argparse.ArgumentParser(description="Run A* search on a robot workspace")
     parser.add_argument("input_file", type=str, help="Path to the input file")
     parser.add_argument("k", type=int, nargs='?', default=0, help="Angle cost penalty parameter (default: 0)")
+    parser.add_argument("-o", "--output_file", type=str, default="Output.txt", help="Name of the output file (default: 'Output.txt')")
     args = parser.parse_args()
 
     start_pos, goal_pos, workspace = process_input(args.input_file)
@@ -264,7 +265,7 @@ def main():
         output_dict = calculate_output_values(final_node, workspace)
         output_dict["generated_nodes"] = generated_nodes
         output = OutputModel(output_dict)
-        output_into_file(output)
+        output_into_file(output, args.output_file)
 
 
 if __name__ == "__main__":
